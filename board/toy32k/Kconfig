@@ -1,0 +1,15 @@
+if TARGET_TOY32K
+
+config SYS_BOARD
+	default "toy32k"
+
+config SYS_VENDOR
+	default "bson"
+
+config SYS_CONFIG_NAME
+	default "toy32k"
+
+config TEXT_BASE
+	default 0x000000
+
+endif

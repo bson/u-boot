@@ -1,0 +1,12 @@
+menu "NS32000 architecture"
+	depends on NS32K
+
+config SYS_ARCH
+	default "ns32k"
+
+config STATIC_RELA
+	default y
+
+source "board/toy32k/Kconfig"
+
+endmenu

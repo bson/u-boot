@@ -34,6 +34,63 @@ struct ks_net {
 	u8			extra_byte;
 };
 
+#ifdef __TOY32K__
+/* XXX will the address auto increment? */
+
+/* 8-bit bus on a 32-bit data bus.  A1 = CMD */
+static u8 ks_rdreg8(struct ks_net *ks, u16 offset)
+{
+    writeb(offset, ks->iobase + 2);
+    return readb(ks->iobase);
+}
+
+static u16 ks_rdreg16(struct ks_net *ks, u16 offset)
+{
+    writeb(offset, ks->iobase + 2);
+    u16 tmp = readb(ks->iobase);
+    writeb(offset + 1, ks->iobase + 2);
+    return (readb(ks->iobase) << 8) | tmp;
+}
+
+static void ks_wrreg16(struct ks_net *ks, u16 offset, u16 val)
+{
+    writeb(offset, ks->iobase + 2);
+    writeb(val & 0xff, ks->iobase);
+    writeb(offset + 1, ks->iobase + 2);
+    writeb(val >> 8, ks->iobase);
+}
+
+/*
+ * ks_inblk - read a block of data from QMU. This is called after sudo DMA mode
+ * enabled.
+ * @ks: The chip state
+ * @wptr: buffer address to save data
+ * @len: length in byte to read
+ */
+static inline void ks_inblk(struct ks_net *ks, u8 *bptr, u32 len)
+{
+    u8* bptr = (u8*)wptr;
+
+	while (len--)
+		*bptr++ = readw(ks->iobase);
+}
+
+/*
+ * ks_outblk - write data to QMU. This is called after sudo DMA mode enabled.
+ * @ks: The chip information
+ * @wptr: buffer address
+ * @len: length in byte to write
+ */
+static inline void ks_outblk(struct ks_net *ks, u16 *wptr, u32 len)
+{
+    u8* bptr = (u8*)wptr;
+
+	while (len--)
+		write(*bptr++, ks->iobase);
+}
+#else
+#error FIXME - missing define?
+
 #define BE3             0x8000      /* Byte Enable 3 */
 #define BE2             0x4000      /* Byte Enable 2 */
 #define BE1             0x2000      /* Byte Enable 1 */
@@ -90,6 +147,7 @@ static inline void ks_outblk(struct ks_net *ks, u16 *wptr, u32 len)
 	while (len--)
 		writew(*wptr++, ks->iobase);
 }
+#endif
 
 static void ks_enable_int(struct ks_net *ks)
 {

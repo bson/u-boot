@@ -1,0 +1,1 @@
+CLFLAGS += -D__TOY32__
